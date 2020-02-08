@@ -1,0 +1,51 @@
+name: fin
+version: "1.0"
+author: Mitchel Wassler
+about: Does some basic personal finance calculations
+subcommands:
+  - interest:
+        about: Calculates the total interest and amount paid for a loan
+        args:
+            - principal:
+                short: p
+                help: Principal owed
+                required: true
+                value_name: principal
+            - interest:
+                short: i
+                help: interest Rate
+                required: true
+                value_name: interest
+            - total-months:
+                short: m
+                help: Total Months on the loan
+                required: true
+                value_name: total_months
+  - early-payoff:
+        about: Shows saving from paying a loan off early
+        args:
+            - principal:
+                short: p
+                help: Principal owed
+                required: true
+                value_name: principal
+            - interest:
+                short: i
+                help: interest Rate
+                required: true
+                value_name: interest
+            - remaining-months:
+                short: r
+                help: Months Remaning on the loan
+                required: true
+                value_name: remaining_months
+            - total-months:
+                short: m
+                help: Months Remaning on the loan
+                required: true
+                value_name: total_months
+            - extra-payments:
+                short: e
+                help: Extra paid per month
+                required: true
+                value_name: extra_payments
