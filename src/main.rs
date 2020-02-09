@@ -2,8 +2,11 @@
 extern crate clap;
 extern crate currency;
 
+mod loan;
+
 use clap::App;
 use math::round;
+use loan::Loan;
 
 fn main() {
 	let yaml = load_yaml!("../config/cli.yml");
@@ -14,18 +17,13 @@ fn main() {
         println!("Using input file: {}", matches.value_of("principal").unwrap());
     }
 
-    if let Some(matches) = matches.subcommand_matches("interest") {
-        let principal = matches.value_of("principal").unwrap();
-        let interest = matches.value_of("interest").unwrap();
-        let total_months = matches.value_of("total-months").unwrap();
+    if let Some(matches) = matches.subcommand_matches("interest") {        
 
-        let principal : f64 = principal.parse().unwrap();
-        let interest : f64 = interest.parse().unwrap();
-        let total_months : i64 = total_months.parse().unwrap();
+        let loan = Loan::from_args(matches);
 
-        let (total, monthly) = calculate_simple_interest(principal, interest, total_months);
+        let (total, monthly) = calculate_simple_interest(loan.principal, loan.interest, loan.terms);
 
-        show_amoritization_table(principal, interest, monthly);
+        show_amoritization_table(loan.principal, loan.interest, monthly);
         
         println!("Total Ammount: {}", total);
         println!("monthly Payments: {}", monthly);
@@ -59,10 +57,9 @@ fn show_amoritization_table(principal: f64, interest: f64, payment: f64) {
 }
 
 
-fn calculate_simple_interest(principal: f64, interest: f64, period: i64) -> (f64, f64) {
-	let period_float = period as f64;
-	let monthly_payments = calultate_monthly_payment(principal, interest, period_float);
-	((monthly_payments * period_float),  monthly_payments)
+fn calculate_simple_interest(principal: f64, interest: f64, period: f64) -> (f64, f64) {
+	let monthly_payments = calultate_monthly_payment(principal, interest, period);
+	((monthly_payments * period),  monthly_payments)
 }
 
 fn calultate_monthly_payment(principal: f64, interest: f64, period: f64) -> f64 {
