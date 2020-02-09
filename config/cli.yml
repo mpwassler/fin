@@ -21,6 +21,11 @@ subcommands:
                 help: Total Months on the loan
                 required: true
                 value_name: total_months
+            - tables:
+                short: t
+                help: Render amortization tables
+                required: false
+                value_name: tables
   - early-payoff:
         about: Shows saving from paying a loan off early
         args:
