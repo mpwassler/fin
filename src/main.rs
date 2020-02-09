@@ -12,21 +12,50 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("early-payoff") {
         println!("welcome to early payoff");
         println!("Using input file: {}", matches.value_of("principal").unwrap());
-        
     }
 
     if let Some(matches) = matches.subcommand_matches("interest") {
         let principal = matches.value_of("principal").unwrap();
         let interest = matches.value_of("interest").unwrap();
         let total_months = matches.value_of("total-months").unwrap();
-        let principal_float : f64 = principal.parse().unwrap();
-        let interest_float : f64 = interest.parse().unwrap();
-        let total_months_float : i64 = total_months.parse().unwrap();
-        let (total, monthly) = calculate_simple_interest(principal_float, interest_float, total_months_float);
+
+        let principal : f64 = principal.parse().unwrap();
+        let interest : f64 = interest.parse().unwrap();
+        let total_months : i64 = total_months.parse().unwrap();
+
+        let (total, monthly) = calculate_simple_interest(principal, interest, total_months);
+
+        show_amoritization_table(principal, interest, monthly);
+        
         println!("Total Ammount: {}", total);
         println!("monthly Payments: {}", monthly);
         
     }
+}
+
+fn show_amoritization_table(principal: f64, interest: f64, payment: f64) {
+	let mut principal_remaining = principal;
+	let mut payments_made = 1;
+
+	let interest_per_month = calculate_monthly_interest(interest);
+    	    
+    println!(
+        "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
+        "payment", "principal remaining", "principal paid", "interest paid"
+    );
+
+	while round::floor(principal_remaining, 0) > 0.0 {
+		let months_interest = principal_remaining * interest_per_month;
+		let payment_to_principal = payment - months_interest;
+
+		principal_remaining -= payment_to_principal;
+	    println!(
+            "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
+            payments_made, round::half_away_from_zero(principal_remaining, 2), round::half_away_from_zero(payment_to_principal, 2), round::half_away_from_zero(months_interest, 2)
+	    );
+
+	    payments_made += 1;
+	}			    
 }
 
 
@@ -34,16 +63,19 @@ fn calculate_simple_interest(principal: f64, interest: f64, period: i64) -> (f64
 	let period_float = period as f64;
 	let monthly_payments = calultate_monthly_payment(principal, interest, period_float);
 	((monthly_payments * period_float),  monthly_payments)
-
 }
 
 fn calultate_monthly_payment(principal: f64, interest: f64, period: f64) -> f64 {
-	let interest_per_month = round::floor(interest / 12.00, 9);
-	let interest_per_month_decimal = interest_per_month / 100.00;
-	let top = interest_per_month_decimal * (1.00 + interest_per_month_decimal).powf(period);
-	let bottom = (1.00 + interest_per_month_decimal).powf(period) - 1.00;
+	let interest_per_month = calculate_monthly_interest(interest);
+	let top = interest_per_month * (1.00 + interest_per_month).powf(period);
+	let bottom = (1.00 + interest_per_month).powf(period) - 1.00;
 	let fraction = round::floor(top, 9) / round::floor(bottom, 9); 	
 	round::floor(principal * fraction, 2)
+}
+
+fn calculate_monthly_interest(interest: f64) -> f64 {
+	let interest_per_month = interest / 12.00;
+	round::half_away_from_zero(interest_per_month / 100.00, 15)
 }
 
 
@@ -65,5 +97,10 @@ mod tests {
     fn test_calculate_monthly_payment() {
     	let as_int = calultate_monthly_payment(25000.00, 3.11, 60.00) as i64;
     	assert_eq!(as_int, 450);	
+    }
+
+    #[test]
+    fn test_calculate_monthly_interest() {    	    	
+    	assert_eq!(calculate_monthly_interest(3.11), 0.002591666666667);
     }
 }
